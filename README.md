@@ -14,9 +14,14 @@ gcloud config set project $MY_PROJECT_ID
 
 # Process 
 ## Task1
+- change the project for gcloud to configure QR env 
+`gcloud config set project $MY_PROJECT_ID`
 - Created a GCP project
 - Enable compute service, GKE service 
-- Created a network for Infra in Frankfurt with Terraform 
+- created a Service Account for terraform 
+
+`gcloud iam service-accounts create qr-tf-sa --display-name=”QR_Terraform_SA”`
+
 - 
 
 
