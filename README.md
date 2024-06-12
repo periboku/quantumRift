@@ -7,6 +7,11 @@
 5. süreçlerin dökümanını markdown ile çıkar.
 
 
+
+change the project 
+
+gcloud config set project $MY_PROJECT_ID
+
 # Process 
 ## Task1
 - Created a GCP project
