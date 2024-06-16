@@ -17,6 +17,8 @@ gcloud config set project $MY_PROJECT_ID
 
 
 
+
+
 Analiz
 - terraform ile network, subnet, vm yarat
 - gcloud cli ile servis acc'leri yarat
@@ -27,7 +29,7 @@ Analiz
 - gitlab'i vm'in icine kur
 script ile kurduktan sonra vm'e bağlanıp 
 sudo cat /etc/gitlab/initial_root_password yada sudo gitlab-rake "gitlab:password:reset[root]"  ile şifreyi resetliyoruz. 
-sonrasında http://35.242.198.205/users/sign_in adresinden girebiliyoruz. 
+sonrasında http://34.141.23.142/users/sign_in adresinden girebiliyoruz. 
 
 
 
@@ -46,3 +48,4 @@ sonrasında http://35.242.198.205/users/sign_in adresinden girebiliyoruz.
 	- kubernetes deployment'i pipeline'a ekle.
 	- servis hesaplarini degisken olarak pipeline ekle
 
+sudo gitlab-ctl reconfigure

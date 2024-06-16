@@ -17,13 +17,13 @@ resource "google_compute_subnetwork" "default" {
 
 
 
-
 # Creating firewall rule for gitlab vm
 resource "google_compute_firewall" "rules" {
   project     = "quantumrift"
   name        = "gitlab-fw-rule"
   network     = "vm-network"
   description = "Creates firewall rule targeting tagged instances"
+  depends_on = [ google_compute_instance.default ]
 
   allow {
     protocol  = "tcp"
@@ -32,39 +32,6 @@ resource "google_compute_firewall" "rules" {
   target_tags = ["gitlab-vm"]
   source_ranges = ["0.0.0.0/0"]
 }
-
-
-resource "google_service_account" "tf_sa" {
-  account_id   = "service-account-id"
-  display_name = "TF Service Account"
-  project = "quantumrift"
-}
-
-
-
-# iam role for reading gcp bucket to download gitlab installation shell script
-resource "google_service_account_iam_binding" "storage_reader" {
-  service_account_id = google_service_account.tf_sa.name
-  role               = "roles/storage.objectViewer"
-  members = [
-    "serviceAccount:google_service_account.tf_sa.email", 
-  ]
-}
-
-
-
-/*
-resource "google_service_account_iam_binding" "artifact_reader" {
-  service_account_id = google_service_account.tf_sa.name
-  role               = "roles/artifactregistry.reader"
-  members = [
-    "serviceAccount:google_service_account.tf_sa.email", 
-  ]
-}
-*/
-
-
-
 
 
 # gitlab-vm
@@ -81,12 +48,8 @@ resource "google_compute_instance" "default" {
     }
   }
 
-  service_account {
-    email = google_service_account.tf_sa.email
-    scopes = ["cloud-platform"]
-  }
 
-  metadata_startup_script = "gsutil cp gs://gitlab-install/install_gitlab.sh  /tmp/; sudo chmod +x /tmp/install_gitlab.sh; ./install_gitlab.sh"
+  metadata_startup_script = "sudo apt update; sudo apt install git -y; git clone https://github.com/periboku/quantumRift.git; cd quantumRift/; chmod +x install_gitlab.sh; sudo ./install_gitlab.sh"
 
 
   network_interface {
@@ -98,24 +61,3 @@ resource "google_compute_instance" "default" {
   }
 }
 
-
-
-
-resource "google_storage_bucket" "static" {
- name          = "gitlab-install"
- location      = "EU"
- storage_class = "STANDARD"
- project = "quantumrift"
-
- uniform_bucket_level_access = true
-}
-
-# Upload a text file as an object
-# to the storage bucket
-
-resource "google_storage_bucket_object" "default" {
- name         = "install_gitlab.sh"
- source       = "~/install_gitlab.sh"
- content_type = "text/plain"
- bucket       = google_storage_bucket.static.id
-}
