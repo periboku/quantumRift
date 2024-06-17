@@ -38,7 +38,7 @@ resource "google_compute_firewall" "rules" {
 resource "google_compute_instance" "default" {
     name         = "gitlab-vm"
     project      = "quantumrift"
-    machine_type = "n2-standard-4"
+    machine_type = "n2-standard-2"
     zone         = "europe-west3-a"
     tags         = ["gitlab-vm"]
 
@@ -61,3 +61,18 @@ resource "google_compute_instance" "default" {
   }
 }
 
+# create a google service account for pipeline to access Google artifact repository
+
+resource "google_service_account" "gar_sa" {
+  account_id   = "gitlab-gar-sa"
+  display_name = "A service account that only Jane can use"
+  project = "quantumrift"
+}
+
+
+
+resource "google_project_iam_binding" "artifact_admin" {
+  project = "quantumrift"
+  role    = "roles/artifactregistry.admin"
+  members = ["serviceAccount:${google_service_account.gar_sa.email}"]
+}

@@ -1,0 +1,29 @@
+variables:
+  workdir: "web3js-example"
+
+
+stages:
+  - build
+  - dockerize
+  - deploy
+
+build:
+  stage: build
+  image: node:8.12-alpine
+  script:
+    - cd $workdir
+    - npm install
+    - CI=false npm run build
+  artifacts:
+    paths:
+      - $workdir/build
+
+
+dockerize: 
+  stage: dockerize
+  services:
+    - docker:22.06-rc-dind
+  
+  script:
+    - $GAR | docker login -u _json_key 
+    - docker build -t 
