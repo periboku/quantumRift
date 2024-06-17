@@ -34,13 +34,24 @@ sonrasında http://34.141.23.142/users/sign_in adresinden girebiliyoruz.
 
 
 
+
 - web3.js aplikasyonunu incele
-- web3.js aplikasyonunun calisabilecegi bir dockerfile yarat
-- yaratilan dockerfile'i lokalde test et
+	web3.js app bulamadım doğru düzgün. docker'ın bir tane simple node.js örneğini buldum. onun üzerinden gittim. 
+	şuan bu çalışıyor. 
+	docker build . -t node_test(buraya normalde bütün container registry adresi basmamız lazım ki bu repoyu pushlayalım) 
+
+
+- web3.js aplikasyonunun calisabilecegi bir dockerfile yarat tamam 
+- yaratilan dockerfile'i lokalde test et tamam
 
 
 - console'dan  gke cluster yarat
+
+
+
 - web3.js'yi calistiran bir k8s deployment ve k8s service dosyasi yarat
+
+
 
 - gitlab'da web.js aplikasyonunu build edebilen bir pipeline yaz.
 	- dockerfile'i pipeline'a ekle
