@@ -16,7 +16,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 
-
 # Creating firewall rule for gitlab vm
 resource "google_compute_firewall" "rules" {
   project     = "quantumrift"
@@ -61,18 +60,50 @@ resource "google_compute_instance" "default" {
   }
 }
 
-# create a google service account for pipeline to access Google artifact repository
 
-resource "google_service_account" "gar_sa" {
-  account_id   = "gitlab-gar-sa"
-  display_name = "A service account that only Jane can use"
+resource "google_service_account" "k8s-sa" {
+  account_id   = "service-account-id"
+  display_name = "K8S Service Account"
   project = "quantumrift"
 }
 
 
-
-resource "google_project_iam_binding" "artifact_admin" {
+# Role binding to service account for GKE
+resource "google_project_iam_member" "k8s-role-binging-sa" {
+  for_each = toset([
+    "roles/artifactregistry.admin",
+    "roles/container.developer",
+    "roles/binaryauthorization.attestorsViewer",
+    "roles/cloudkms.cryptoOperator",
+    "roles/cloudkms.publicKeyViewer",
+  ])
+  role = each.key
+  member = "serviceAccount:${google_service_account.k8s-sa.email}"
   project = "quantumrift"
-  role    = "roles/artifactregistry.admin"
-  members = ["serviceAccount:${google_service_account.gar_sa.email}"]
+}
+
+resource "google_container_cluster" "primary" {
+  name     = "quantumriftCluster"
+  location = "europe-west3"
+  project = "quantumrift"
+  remove_default_node_pool = true
+  initial_node_count       = 1
+  deletion_protection = false
+}
+
+resource "google_container_node_pool" "primary_preemptible_nodes" {
+  name       = "node-pool"
+  location   = "europe-west3"
+  cluster    = google_container_cluster.primary.name
+  node_count = 1
+  project = "quantumrift"
+
+  node_config {
+    preemptible  = true
+    machine_type = "n2-standard-2"
+    service_account = google_service_account.k8s-sa.email
+    oauth_scopes    = [
+      "https://www.googleapis.com/auth/cloud-platform"
+    ]
+  }
 }

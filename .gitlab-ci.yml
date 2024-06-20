@@ -1,6 +1,8 @@
 variables:
-  workdir: "web3js-example"
-
+  workdir: "kod"
+  GCP_PROJECT: quantumrift
+  GAR_REPO: europe-west3-docker.pkg.dev/quantumrift/
+  GAR_APP_IMAGE: $GAR_REPO/quantumriftapprepo
 
 stages:
   - build
@@ -13,17 +15,29 @@ build:
   script:
     - cd $workdir
     - npm install
-    - CI=false npm run build
-  artifacts:
-    paths:
-      - $workdir/build
 
+    
 
 dockerize: 
   stage: dockerize
   services:
-    - docker:22.06-rc-dind
-  
+    - docker:22.06-rc-dind 
+  before_script:
+    - echo $GAR_ACCOUNT | docker login -u _json_key --password-stdin https://europe-west3-docker.pkg.dev
   script:
-    - $GAR | docker login -u _json_key 
-    - docker build -t 
+    - cd /k8s 
+    - docker build -f k8s/Dockerfile .  -t $GAR_REPO/$GAR_APP_IMAGE:latest
+    - docker push $GAR_REPO/$GAR_APP_IMAGE:latest
+
+
+deploy:
+  stage: deploy
+  image: gcr.io/google.com/cloudsdktool/google-cloud-cli:latest
+  before_script:
+    - echo $GAR_ACCOUNT > /tmp/deploy-account.json
+    - gcloud auth activate-service-account --key-file=/tmp/deploy-account.json
+    - gcloud container clusters get-credentials quantumriftCluster --region europe-west3 --project quantumrift 
+  script:
+    - kubectl apply -f /k8s/deployment.yaml
+  tags:
+    - quantumrift-runner
